@@ -34,8 +34,5 @@ All endpoints listed here must be reachable through port **443**.
 
 | Optional wildcard | Endpoint | Description | Supported static IP addresses |
 | --- | --- | --- | --- |
-| *endpoint.ingress.rapid7.com | endpoint.ingress.rapid7.com | Insight Agent messages and beacons. | 34.226.68.35 |
-| | | | 54.144.111.231 |
-| | | | 52.203.25.223 |
-| | | | 34.236.161.191 |
+| *endpoint.ingress.rapid7.com | endpoint.ingress.rapid7.com | Insight Agent messages and beacons. | 34.226.68.35, 54.144.111.231, 52.203.25.223, 34.236.161.191 |
 | " " | us.storage.endpoint.ingress.rapid7.com | Insight Agent file uploads. | 34.226.68.35 |
