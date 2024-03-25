@@ -26,13 +26,30 @@ Most, but not all, endpoints documented in these sections support static IP addr
 
 Rapid7 does not plan on changing these IP addresses in the near future. If changes are required, we'll update this document and communicate the details on the Insight Agent release notes page.
 
-_The original article provides a collapsible endpoint requirement table for each region. I've only reproduced the **United States - 1** table here for brevity._
+> _The original article provides a collapsible endpoint requirement table for each region. I've only reproduced the **United States - 1** table here for brevity._
 
 ### United States - 1
 
-All endpoints listed here must be reachable through port **443**.
+All endpoints listed here must be reachable through port **443**. `" "` in a table cell denotes that the content is identical to the previous cell in the column.
 
 | Optional wildcard | Endpoint | Description | Supported static IP addresses |
 | --- | --- | --- | --- |
 | *endpoint.ingress.rapid7.com | endpoint.ingress.rapid7.com | Insight Agent messages and beacons. | 34.226.68.35, 54.144.111.231, 52.203.25.223, 34.236.161.191 |
-| " " | us.storage.endpoint.ingress.rapid7.com | Insight Agent file uploads. | 34.226.68.35 |
+| " " | us.storage.endpoint.ingress.rapid7.com | Insight Agent file uploads. | 34.226.68.35, 54.144.111.231, 52.203.25.223, 34.236.161.191 |
+| " " | us.api.endpoint.ingress.rapid7.com | Insight Agent messages, beacons, and file uploads. | 34.226.68.35, 54.144.111.231, 52.203.25.223, 34.236.161.191 |
+| " " | us.bootstrap.endpoint.ingress.rapid7.com | Updates for the Insight Agent software. | 34.226.68.35, 54.144.111.231, 52.203.25.223, 34.236.161.191 |
+| " " | us.deployment.endpoint.ingress.rapid7.com | Certificate files for token-based Insight Agent installations. | 34.226.68.35, 54.144.111.231, 52.203.25.223, 34.236.161.191 |
+| " " | us.main.endpoint.ingress.rapid7.com | Insight Agent messages and beacons. | 193.149.136.0/24 |
+| " " | us.storage.main.endpoint.ingress.rapid7.com | Insight Agent file uploads. | 193.149.136.0/24 |
+| " " | us.api.main.endpoint.ingress.rapid7.com | Insight Agent file uploads and beacons. | 193.149.136.0/24 |
+| *.insight.rapid7.com | data.insight.rapid7.com | Insight Agent messages, beacons, update requests, and file uploads for collection using the Rapid7 Collector. | None |
+| " " | us.data.insight.rapid7.com | " " | None |
+| " " | us.data.logs.insight.rapid7.com | Logs to InsightOps. | None |
+
+## Port requirements for assets when using Rapid7 Collectors as proxies
+
+If you use the Rapid7 Collector as a proxy destination for Insight Agent traffic, your assets must also be allowed to communicate with your Collector host through these ports:
+
+* **5508** - Used for agent messages and beacons.
+* **6608** - Used for agent update requests and file uploads for collection.
+* **8037** - Used for agent messages and beacons.
