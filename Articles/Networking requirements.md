@@ -1,6 +1,15 @@
 # Writing sample - connectivity requirements for security monitoring software
 
-
+> [This article](https://docs.rapid7.com/insight-agent/network-traffic-and-connectivity-requirements) was published on [May 17, 2023](https://docs.rapid7.com/release-notes/insightagent/20230517/) as a major rewrite to the Insight Agent connectivity requirements article that existed previously.
+> 
+> For context, the Insight Agent software collects security-related data on a computer device (referred to as an **asset** in Rapid7 terminology) and transmits that data to a cloud for analysis. Customers can view this analysis in Rapid7 applications (InsightVM, InsightIDR, etc). If the Insight Agent can't communicate with the cloud, the data can't be analyzed, and the device can't be monitored. Therefore, uninterrupted and stable Insight Agent communication with the cloud is very important.
+>
+> Steady reports of customer pain with Insight Agent connectivity revealed that the original article (also written by me years before) did not adequately present the required endpoint traffic rules or document common pitfalls that customers could encounter during a deployment. I worked closely with Engineering, Product Management, and Customer Advisors to gather comprehensive information on the topic and draft this rewrite to fill in these gaps. Notable additions and changes include:
+> 
+> * Expandable endpoint communication tables for each Rapid7 data storage region.
+>   * These tables also list all required endpoints as literals, which replaced the strategy of naming only a few endpoints using wildcards. Customers reported their IT teams are often not allowed to configure firewall rules based on wildcards at all, so we made this change to accommodate that.
+> * A warning on using deep packet inspection software in an Insight Agent deployment.
+> * Clear indications on whether a specific endpoint supports static IP addresses.
 
 # Insight Agent requirements - network traffic and connectivity
 
@@ -26,7 +35,7 @@ Most, but not all, endpoints documented in these sections support static IP addr
 
 Rapid7 does not plan on changing these IP addresses in the near future. If changes are required, we'll update this document and communicate the details on the Insight Agent release notes page.
 
-> _The original article provides a collapsible endpoint requirement table for each region. I've only reproduced the **United States - 1** table here for brevity._
+> The original article provides an endpoint requirement table for each region. I've only reproduced the **United States - 1** table here for brevity.
 
 ### United States - 1
 
