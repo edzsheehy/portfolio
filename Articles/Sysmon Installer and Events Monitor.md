@@ -1,6 +1,15 @@
 # Writing sample - Rapid7-managed Sysmon component overview
 
-
+> [This article](https://docs.rapid7.com/insight-agent/sysmon-installer-events-monitor-overview) was published on [February 22, 2023](https://docs.rapid7.com/release-notes/insightagent/20230222/) to inform customers about how the Rapid7-managed edition of the Sysmon service works.
+>
+> For context, the InsightIDR and MDR products are designed to log computer events for devices that an IT team has a security interest in. Each of these devices are monitored by an installed Insight Agent that sends these events to the cloud for analysis. For devices running a Windows operating system, the [Sysmon service](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon) provides the most robust event logging capabilities and makes it the preferable event collection method.
+>
+> Sysmon plays an important role in InsightIDR and MDR providing the best value to customers, so the Insight Agent takes exclusive control of the Sysmon configuration on the device to ensure event collection is reliably stable. However, this exclusive control arrangement has some drawbacks:
+> 
+> * While Sysmon provides better event logging data, it's also error-prone and can cause Windows to crash - an issue that's out of Rapid7's control and is related to Sysmon's kernal-level operation.
+> * An IT team might want to use a custom Sysmon configuration for their own purposes.
+>
+> I wrote the following article to explain how the Sysmon service works alongside Rapid7 products, what customers should expect if the Sysmon service encounters errors, and what accommodations Rapid7 makes for both Sysmon's crash problem and a customer's desire to use their own configuration.
 
 # Sysmon Installer and Events Monitor - how the Insight Agent implements these components for use with InsightIDR and MDR
 
