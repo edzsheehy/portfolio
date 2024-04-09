@@ -26,7 +26,7 @@ After Sysmon writes these events to the Windows event log, the Events Monitor co
 The Insight Agent has its own alternative component called **ui_realtime** that is designed to take over events data collection responsibilities if any of the following scenarios are encountered during the Sysmon deployment phase:
 
 * The operating system the Insight Agent is installed on is outdated or is not compatible with Sysmon.
-* A pre-existing, non-Rapid7 deployment of Sysmon is already present on the asset (see the [component overview](#sysmon-installer-component-overview) for details).
+* A pre-existing, non-Rapid7 deployment of Sysmon is already present on the asset (see the [component overview](#sysmon-installer---component-overview) for details).
 * A system crash triggered the removal of the Rapid7-installed Sysmon service (see the [known issues](#known-issues-with-the-sysmon-service) section for details).
 
 The ui_realtime component runs in the user space of the operating system (as opposed to the kernel space where Sysmon runs), which makes it less efficient than Sysmon during times of heavy load. For this reason, ui_realtime is preferable serving a backup collection role.
@@ -39,7 +39,7 @@ The Sysmon Installer component included with the Insight Agent is responsible fo
 
 ### Sysmon Installer will not replace a pre-existing Sysmon installation
 
-When installing the Insight Agent on an asset for the first time, Sysmon Installer **will not** replace an existing Sysmon installation to avoid disrupting your security operations. When this condition applies, the [ui_realtime component](#ui_realtime-the-alternative-data-collection-component) assumes full responsibility for collecting events data for InsightIDR and MDR.
+When installing the Insight Agent on an asset for the first time, Sysmon Installer **will not** replace an existing Sysmon installation to avoid disrupting your security operations. When this condition applies, the [ui_realtime component](#ui_realtime---the-alternative-data-collection-component) assumes full responsibility for collecting events data for InsightIDR and MDR.
 
 ### Configuration details
 
@@ -60,11 +60,11 @@ These corrective measures are necessary to ensure that InsightIDR and MDR contin
 
 Sysmon's nature as a kernel-level service gives it the ability to capture events early in the boot process. While desirable from a visibility perspective, this also increases the likelihood of Sysmon causing an overall system crash. As a best practice, Rapid7 mitigates the possibility of this happening by delaying Sysmon version upgrades for a time so that any unknown bugs can be addressed beforehand. As an exception to this, Rapid7 will update Sysmon to the latest version as soon as possible if the installed version is revealed to be vulnerable.
 
-Sysmon Installer includes logic designed to safeguard asset stability. If an asset running a Rapid7-installed version of Sysmon experiences a system crash for any reason (whether attributed to Sysmon or not), Sysmon Installer will uninstall the Sysmon service automatically and promote [ui_realtime](#ui_realtime-the-alternative-data-collection-component) as the sole component responsible for events data collection. From this point, Sysmon Installer would only reinstall Sysmon with the release of a new version.
+Sysmon Installer includes logic designed to safeguard asset stability. If an asset running a Rapid7-installed version of Sysmon experiences a system crash for any reason (whether attributed to Sysmon or not), Sysmon Installer will uninstall the Sysmon service automatically and promote [ui_realtime](#ui_realtime---the-alternative-data-collection-component) as the sole component responsible for events data collection. From this point, Sysmon Installer would only reinstall Sysmon with the release of a new version.
 
 ### How to request a custom Sysmon configuration
 
-While it's possible to implement a custom Sysmon configuration outside of Rapid7's control, be aware that doing so will preclude your ability to use Sysmon to collect events data for use with InsightIDR and MDR. Events Monitor does not support the ingestion of events from any Sysmon deployment other than the one installed by Rapid7's Sysmon Installer. In this scenario, events data collection would once again be the responsibility of [ui_realtime](#ui_realtime-the-alternative-data-collection-component).
+While it's possible to implement a custom Sysmon configuration outside of Rapid7's control, be aware that doing so will preclude your ability to use Sysmon to collect events data for use with InsightIDR and MDR. Events Monitor does not support the ingestion of events from any Sysmon deployment other than the one installed by Rapid7's Sysmon Installer. In this scenario, events data collection would once again be the responsibility of [ui_realtime](#ui_realtime---the-alternative-data-collection-component).
 
 If you wish to proceed with a custom Sysmon configuration nonetheless, open a case with the Rapid7 Support team to get started. Rapid7 must first remove the Sysmon Installer component across your entire organization before you can implement your own Sysmon configuration.
 
