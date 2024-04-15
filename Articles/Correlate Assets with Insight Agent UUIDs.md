@@ -4,16 +4,16 @@
 >
 > For context, the InsightVM product is designed to scan devices on a company network for vulnerabilities and generate reports on those findings for an IT team. InsightVM can scan devices (known as **assets** in Rapid7 terminology) in 2 ways:
 >
-> * Using a scan engine, which is a separate application installed on a dedicated host on the same network.
+> * Using a Scan Engine, which is a separate application installed on a dedicated host on the same network.
 >   * This is the traditional method of scanning.
 > * Using the Insight Agent, which is monitoring software installed on each asset.
 >   * This is a newer, alternative method of scanning.
 >
 > To ensure that unique devices are recognized from scan to scan, InsightVM runs a process called "asset correlation" which compares the attributes of a scan target (IP address, MAC address, etc) with historical asset records from prior scans. This process is essential for establishing vulnerability trend data for assets on a network and prevents the same asset from being counted more than once.
 >
-> The asset correlation process is straightforward when using scan engines alone, but becomes complicated when Insight Agents are performing vulnerability assessments as well. Scan engines perform their job from the outside, meaning the richness of the data they collect depends on what the asset allows an unauthenticated connection to see (you can also provide scan engines with sets of credentials to get around this). On the other hand, Insight Agents are installed on an asset with Administrator privileges up front, so their vulnerability assessments are considered "authenticated" by default. If a scan engine and an Insight Agent with different levels of access perform a vulnerability assessment on the same asset, disparities in the data collected from each could pose a problem for the asset correlation process and result in InsightVM counting the two assessments as separate devices.
+> The asset correlation process is straightforward when using Scan Engines alone, but becomes complicated when Insight Agents are performing vulnerability assessments as well. Scan Engines perform their job from the outside, meaning the richness of the data they collect depends on what the asset allows an unauthenticated connection to see (you can also provide Scan Engines with sets of credentials to get around this). On the other hand, Insight Agents are installed on an asset with Administrator privileges up front, so their vulnerability assessments are considered "authenticated" by default. If a Scan Engine and an Insight Agent with different levels of access perform a vulnerability assessment on the same asset, disparities in the data collected from each could pose a problem for the asset correlation process and result in InsightVM counting the two assessments as separate devices.
 >
-> I wrote the following article to explain the nature of asset correlation and document a UUID checking feature that Rapid7 released to help scan engines and Insight Agents work together more effectively.
+> I wrote the following article to explain the nature of asset correlation and document a UUID checking feature that Rapid7 released to help Scan Engines and Insight Agents work together more effectively.
 
 # Correlate Assets with Insight Agent UUIDs
 
