@@ -41,13 +41,13 @@ Sometimes the user is responsible for the application getting stuck. The followi
 
 The following scenarios are not errors, but are sometimes misattributed as such. Keep an eye out for cases like these so you can categorize them correctly for the user:
 
-* A program or component is inactive
+* A program or component is inactive.
   * For programs or components that are designed to perform jobs or ingest specific events, inactivity is not necessarily a sign that something went wrong. There simply may not be any events to process. This should be reported as a **warning**, not an error.
   * The exception to this is when the program or component's function is supposed to be observably constant. Inactivity like this should be reported as an **error**.
-* A component is near resource exhaustion
+* A component is near resource exhaustion.
   * It's common to advise a user when a component is approaching the limits of its hardware, which can eventually impact the performance of the application. Nothing has gone wrong yet, so this should be reported as a **warning**, not an error.
   * However, an application that crashes because the component has exceeded the limits of its resources should be reported as an **error**.
-* A program displays no data
+* A program displays no data.
   * Data visualization products often allow users to filter a data set for specific records. As long as the user provided a valid query, the return of no results by the program is not an error; it just means no records match the criteria. This scenario is known as an **empty state** or **null state** and any language used to explain it should be reported as a **notice**.
   * However, queries can also have invalid formatting that prevents the application from executing a search. This is indeed an **error**.
 
@@ -64,7 +64,7 @@ All error messages should follow these rules:
   * "This" is useful when you need to report an error for something in a spatial way in relation to the rest of the interface. For example, in a dashboard with several cards, one card fails to load while the rest load successfully. In this case, "**This** card failed to load" makes more sense visually than "**The** card failed to load."
   * "A" or "an" are useful when you need to report an error where the subject does not have primacy compared to other subjects. For example, for a component that performs several collection jobs on a repeating basis, one of those jobs failing while the others complete successfully can be reported as "**A** collection task failed."
 * **All error messages must be sanitized** - This means the initial error report must be in a human-readable format. Tracebacks, exception output, codes, and similar error text should not be the **primary** content that is displayed.
-  * Error details like these still have their use (especially for troubleshooting by the Support team), so feel free to make them available if the user explicitly wants to seem them through a call-to-action.
+  * Error details like these still have their use (especially for troubleshooting by the Support team), so feel free to make them available if the user explicitly wants to see them through a call-to-action.
 * **Only provide next steps if the user can perform them quickly and success is likely** - When an error occurs, don't burden the user with complicated troubleshooting steps (this is especially true if the error is not user-attributed) unless the solution is purpose-built to solve the problem and is documented elsewhere. The interface is not the right context for this and only frustrates the user. Further, if the user can take an action to solve the problem, only suggest it if there's a good chance it will work.
   * If you need to provide next steps, skip the formality of saying "please" and just tell the user directly what they need to do.
 * **Avoid meaningless suggestions** - Nonspecific suggestions such as "Try again later" are not valuable and read as dismissive. If a suggestion is warranted, it should also be actionable right away.
