@@ -134,15 +134,17 @@ When showing dates and times in table cells, the interface should support compar
 
 These monospaced examples illustrate this table cell alignment standard:
 
-`Jan  1, 1991 at  1:25 AM UTC`
-`Feb  5, 1999 at  2:15 PM UTC`
-`Mar  9, 2002 at  3:41 AM UTC`
-`Apr 11, 2004 at  4:11 PM UTC`
-`May 15, 2009 at  5:03 AM UTC`
-`Jun 17, 2010 at  6:58 PM UTC`
-`Jul 19, 2012 at  7:34 AM UTC`
-`Aug 20, 2015 at  8:39 PM UTC`
-`Sep 21, 2016 at  9:02 AM UTC`
-`Oct 24, 2019 at 10:45 PM UTC`
-`Nov 26, 2020 at 11:27 AM UTC`
-`Dec 31, 2021 at 12:09 PM UTC`
+```
+Jan  1, 1991 at  1:25 AM UTC
+Feb  5, 1999 at  2:15 PM UTC
+Mar  9, 2002 at  3:41 AM UTC
+Apr 11, 2004 at  4:11 PM UTC
+May 15, 2009 at  5:03 AM UTC
+Jun 17, 2010 at  6:58 PM UTC
+Jul 19, 2012 at  7:34 AM UTC
+Aug 20, 2015 at  8:39 PM UTC
+Sep 21, 2016 at  9:02 AM UTC
+Oct 24, 2019 at 10:45 PM UTC
+Nov 26, 2020 at 11:27 AM UTC
+Dec 31, 2021 at 12:09 PM UTC
+```
