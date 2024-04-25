@@ -1,0 +1,1602 @@
+openapi: 3.0.2
+info:
+  title: Example Service API
+  description: |
+    # Overview
+
+    The Example Service APIv1 exposes endpoints for database objects, the relationships between those objects, and customer account administration. This documentation resource is intended for developers looking to automate Example Service capabilities and extract data for custom visualization and reporting tools.
+    
+    ## Specification
+    
+    This documentation resource is generated from an [OpenAPI 3.0.2](https://spec.openapis.org/oas/v3.0.2) specification in YAML format, which is available for download at the top of the page. If you prefer to generate your own documentation client, [Swagger UI](https://github.com/swagger-api/swagger-ui) and [Redoc](https://github.com/Redocly/redoc) are free tools you can use for this purpose.
+    
+    ## Base URL
+    
+    Execute all requests to this API using the `https://{region}.service.company.com/api/v1` base URL (unless noted otherwise in the operation details), where `{region}` is the code that corresponds to the data center assigned to your organization. These codes are as follows:
+
+    | Data center | Code |
+    | :--- | :---: |
+    | United States - Pacific time | `pacific` |
+    | United States - Mountain time | `mountain` |
+    | United States - Central time | `central` |
+    | United States - Eastern time | `eastern` |
+
+    ## Media types
+    
+    This API accepts and produces `application/json` unless noted otherwise in the operation schema details.
+    
+    ## Methods
+    
+    All endpoints in this API respond to the `OPTIONS` method, which lists all supported methods for the specified endpoint when requested. Refer to each resource category in the documentation to see all supported endpoint and method combinations.
+    
+    ## Response pagination and sorting
+    
+    This API supports response pagination and sorting against collection resources using query parameters. These parameters are documented at the operation reference level.
+    
+    ## Search criteria
+    
+    Some endpoints in this API allow you to provide search criteria in a request body using the `POST` method. Refer to the request body description in each search criteria operation reference for details on all supported fields and operators.
+    
+    ## Rate limits
+    
+    Requests to this API may be rate limited to ensure performance remains consistent for our customers. When rate limiting is in effect, these response headers will indicate your status:
+    
+    * `RateLimit-Limit` - The total number of requests you are permitted to make in the rate limit window. The rate limit window for this API is 60 minutes.
+    * `RateLimit-Remaining` - The number of allowable requests that remain in the current rate limit window.
+    * `RateLimit-Reset` - The time in [UTC epoch seconds](https://www.epochconverter.com/) when the current rate limit window resets.
+    
+    `cURL` request samples for each operation throughout the documentation also have the `--include` option, which ensures these headers are returned in your responses.
+  termsOfService: https://www.linkedin.com/in/edward-sheehy-32999682/
+  version: 'v1'
+  license:
+    name: Edward Sheehy
+    url: https://www.linkedin.com/in/edward-sheehy-32999682/
+servers:
+  - url: https://{region}.service.company.com/v1
+    variables:
+      region:
+        enum:
+          - pacific
+          - mountain
+          - central
+          - eastern
+        default: pacific
+        description: The US region of your data center
+security:
+  - API Key: []
+tags:
+  - name: Things
+    description: |
+      Things are data objects that accounts in your organization possess. All things are created and maintained by privileged users, but are universally viewable by all users once created to avoid the risk of redundancy. These operations allow you to create, edit, delete, and retrieve things in your environment.
+  - name: Relationships
+    description: |
+      Relationships function as tags that you can use to identify the association between an account in your organization and the things the account possesses. These operations allow you to create, edit, delete, and retrieve relationships, as well as associate and disassociate relationships between an account and its things.
+  - name: Accounts
+    description: |
+      Accounts are records for each of your customers. Given their importance, only users with the Global Administrator role can create, edit, and delete accounts, but other non-admin users can view existing account details. In addition to create, edit, and delete operations, you can flag accounts for administrative action.
+externalDocs:
+  description: More writing samples by Edward Sheehy
+  url: https://github.com/edzsheehy/portfolio
+paths:
+  /things:
+    get:
+      tags:
+        - Things
+      summary: Retrieve all things
+      description: |
+        Retrieves a list of all things in your database to which you have `read` privilege, paginated and sorted by the specified query parameters.
+      operationId: GetThings
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/size'
+        - $ref: '#/components/parameters/sort'
+      responses:
+        '200':
+          description: OK - List of things retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getThings200'
+        '401':
+          description: Unauthorized - User authentication failed or not provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden - User does not have the privileges to retrieve things
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found - No things exist, or you don't have the privileges to access them
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+        '405':
+          description: Method Not Allowed - The specified HTTP verb is not supported by the endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/405'
+        '500':
+          description: Internal Server Error - There's an unexpected issue with the server handling the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+        '503':
+          description: Service Unavailable - The server temporarily cannot handle requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/503'
+      x-codeSamples:
+        - lang: cURL
+          label: cURL - macOS / Linux
+          source: |
+            curl --include --request GET 'https://us.service.company.com/api/v1/things?page=0&size=5&sort=id,DESC' \
+            --header 'X-API-Key: api-key-here'
+        - lang: cURL
+          label: cURL - Windows
+          source: |
+            curl --include --request GET "https://us.service.company.com/api/v1/things?page=0&size=5&sort=id,DESC" ^
+            --header "X-API-Key: api-key-here"
+    post:
+      tags:
+        - Things
+      summary: Create a thing
+      description: |
+        Creates a new thing with the data contained in the request body. Your user account must have `write` privilege for new things to execute this request.
+      operationId: CreateThing
+      requestBody:
+        description: |
+          All new things require at least a name, but assigning account ownership is optional. If created successfully, the response will contain the thing's newly assigned unique ID.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/things'
+      responses:
+        '201':
+          description: Created - New thing created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/postThing201'
+        '400':
+          description: Bad Request - The endpoint is invalid, or the request body is malformed or too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized - User authentication failed or not provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden - User does not have the privileges to create things
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '405':
+          description: Method Not Allowed - The specified HTTP verb is not supported by the endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/405'
+        '415':
+          description: Unsupported Media Type - The request body is not in the correct format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/415'
+        '500':
+          description: Internal Server Error - There's an unexpected issue with the server handling the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+        '503':
+          description: Service Unavailable - The server temporarily cannot handle requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/503'
+      x-codeSamples:
+        - lang: cURL
+          label: cURL - macOS / Linux
+          source: |
+            curl --include --request POST 'https://us.service.company.com/api/v1/things' \
+            --header 'X-API-Key: api-key-here' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+                "name": "New thing"
+            }'
+        - lang: cURL
+          label: cURL - Windows
+          source: |
+            curl --include --request POST "https://us.service.company.com/api/v1/things" ^
+            --header "X-API-Key: api-key-here" ^
+            --header "Content-Type: application/json" ^
+            --data-raw "{
+                \"name\": \"New thing\"
+            }"
+  /things/{thingId}:
+    get:
+      tags:
+        - Things
+      summary: Retrieve a thing
+      description: |
+        Retrieves a specific thing using the provided identifier. Your user account must have `read` privilege for the target thing to execute this request.
+      operationId: GetAThing
+      parameters:
+        - $ref: '#/components/parameters/thingPathId'
+      responses:
+        '200':
+          description: OK - Thing retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getThing200'
+        '401':
+          description: Unauthorized - User authentication failed or not provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden - User does not have the privileges to access this thing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found - Thing doesn't exist, or you don't have the privileges to access it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+        '405':
+          description: Method Not Allowed - The specified HTTP verb is not supported by the endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/405'
+        '500':
+          description: Internal Server Error - There's an unexpected issue with the server handling the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+        '503':
+          description: Service Unavailable - The server temporarily cannot handle requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/503'
+      x-codeSamples:
+        - lang: cURL
+          label: cURL - macOS / Linux
+          source: |
+            curl --include --request GET 'https://us.api.base.url.com/version/things/41' \
+            --header 'X-API-Key: api-key-here'
+        - lang: cURL
+          label: cURL - Windows
+          source: |
+            curl --include --request GET "https://us.api.base.url.com/version/things/41" ^
+            --header "X-API-Key: api-key-here"
+    put:
+      tags:
+        - Things
+      summary: Fully update a thing
+      description: |
+        Fully updates an existing thing using the provided identifier with the data contained in the request body. Any fields omitted from the request body are assumed to be null and will be updated as such. Your user account must have `read` and `write` privileges for the target thing to execute this request.
+      operationId: FullyUpdateAThing
+      parameters:
+        - $ref: '#/components/parameters/thingPathId'
+      requestBody:
+        description: |
+          A full update to a thing always requires the `name` field to be populated in the request body since things cannot be nameless. Omitting the `name` field in the body of this request will result in a `400 Bad Request` response. Further, this request **will remove all existing ownership data** if the `ownedBy` object is ommitted. Including the `ownedBy` object with new data **will replace all existing ownership data**.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/things'
+      responses:
+        '200':
+          description: OK - Thing fully updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/postThing201'
+        '400':
+          description: Bad Request - The endpoint is invalid, or the request body is malformed or too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized - User authentication failed or not provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden - User does not have the privileges to update things
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found - Thing doesn't exist, or you don't have the privileges to access it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+        '405':
+          description: Method Not Allowed - The specified HTTP verb is not supported by the endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/405'
+        '415':
+          description: Unsupported Media Type - The request body is not in the correct format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/415'
+        '500':
+          description: Internal Server Error - There's an unexpected issue with the server handling the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+        '503':
+          description: Service Unavailable - The server temporarily cannot handle requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/503'
+      x-codeSamples:
+        - lang: cURL
+          label: cURL - macOS / Linux
+          source: |
+            curl --include --request PUT 'https://us.api.base.url.com/version/things/{thingId}' \
+            --header 'X-API-Key: api-key-here' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+                "name": "New name for existing thing"
+            }'
+        - lang: cURL
+          label: cURL - Windows
+          source: |
+            curl --include --request PUT "https://us.api.base.url.com/version/things/{thingId}" ^
+            --header "X-API-Key: api-key-here" ^
+            --header "Content-Type: application/json" ^
+            --data-raw "{
+                \"name\": \"New name for existing thing\"
+            }"
+    patch:
+      tags:
+        - Things
+      summary: Partially update a thing
+      description: |
+        Partially updates an existing thing using the provided identifer with the data contained in the request body. Any fields omitted from the request body will remain unchanged. Your user account must have `read` and `write` privileges for the target thing to execute this request.
+      operationId: PartiallyUpdateAThing
+      parameters:
+        - $ref: '#/components/parameters/thingPathId'
+      requestBody:
+        description: |
+          A partial update to a thing has no field or object requirements. This request will not remove any existing ownership data. Specifying the `ownedBy` object in the request body will only add additional array members and leave any existing ones unchanged.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/patchThing'
+      responses:
+        '200':
+          description: OK - Thing partially updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/patchThing200'
+        '400':
+          description: Bad Request - The endpoint is invalid, or the request body is malformed or too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized - User authentication failed or not provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden - User does not have the privileges to update things
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found - Thing doesn't exist, or you don't have the privileges to access it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+        '405':
+          description: Method Not Allowed - The specified HTTP verb is not supported by the endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/405'
+        '415':
+          description: Unsupported Media Type - The request body is not in the correct format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/415'
+        '500':
+          description: Internal Server Error - There's an unexpected issue with the server handling the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+        '503':
+          description: Service Unavailable - The server temporarily cannot handle requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/503'
+      x-codeSamples:
+        - lang: cURL
+          label: cURL - macOS / Linux
+          source: |
+            curl --include --request PATCH 'https://us.service.company.com/api/v1/things/{thingId}' \
+            --header 'X-API-Key: api-key-here' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+                "ownedBy": [
+                {
+                  "accountName": "New customer",
+                  "relationship": "New relationship"
+                }
+              ]
+            }'
+        - lang: cURL
+          label: cURL - Windows
+          source: |
+            curl --include --request PATCH "https://us.service.company.com/api/v1/things/{thingId}" ^
+            --header "X-API-Key: api-key-here" ^
+            --header "Content-Type: application/json" ^
+            --data-raw "{
+                \"ownedBy\": [
+                {
+                  \"accountName\": \"New customer\",
+                  \"relationship\": \"New relationship\"
+                }
+              ]
+            }"
+    delete:
+      tags:
+        - Things
+      summary: Delete a thing
+      description: |
+        Deletes a specific thing using the provided identifier. Deleting a thing will also remove it from any customer accounts and relationships the thing is associated with. Your user account must have `delete` privilege for the target thing to execute this request.
+      operationId: DeleteAThing
+      parameters:
+        - $ref: '#/components/parameters/thingPathId'
+      responses:
+        '204':
+          description: No Content - Thing deleted successfully
+        '401':
+          description: Unauthorized - User authentication failed or not provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden - User does not have the privileges to delete this thing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found - Thing doesn't exist, or you don't have the privileges to delete it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+        '405':
+          description: Method Not Allowed - The specified HTTP verb is not supported by the endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/405'
+        '500':
+          description: Internal Server Error - There's an unexpected issue with the server handling the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+        '503':
+          description: Service Unavailable - The server temporarily cannot handle requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/503'
+      x-codeSamples:
+        - lang: cURL
+          label: cURL - macOS / Linux
+          source: |
+            curl --include --request DELETE 'https://us.service.company.com/api/v1/things/{thingId}' \
+            --header 'X-API-Key: api-key-here'
+        - lang: cURL
+          label: cURL - Windows
+          source: |
+            curl --include --request DELETE "https://us.service.company.com/api/v1/things/{thingId}" ^
+            --header "X-API-Key: api-key-here"
+  /things/{thingId}/activity-logs:
+    get:
+      tags:
+        - Things
+      summary: Retrieve logs for a thing
+      description: |
+        Retrieves all activity logs for a specific thing using the provided identifier. Your user account must have `read` privilege for the target thing to execute this request.
+      operationId: GetThingLogs
+      parameters:
+        - $ref: '#/components/parameters/thingPathId'
+      responses:
+        '200':
+          description: OK - Activity logs retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getThingLogs200'
+        '401':
+          description: Unauthorized - User authentication failed or not provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden - User does not have the privileges to access this thing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found - Thing doesn't exist, you don't have the privileges to access it, or no activity logs exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+        '405':
+          description: Method Not Allowed - The specified HTTP verb is not supported by the endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/405'
+        '500':
+          description: Internal Server Error - There's an unexpected issue with the server handling the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+        '503':
+          description: Service Unavailable - The server temporarily cannot handle requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/503'
+      x-codeSamples:
+        - lang: cURL
+          label: cURL - macOS / Linux
+          source: |
+            curl --include --request GET 'https://us.service.company.com/api/v1/things/76/activity-logs' \
+            --header 'X-API-Key: api-key-here'
+        - lang: cURL
+          label: cURL - Windows
+          source: |
+            curl --include --request GET "https://us.service.company.com/api/v1/things/76/activity-logs" ^
+            --header "X-API-Key: api-key-here"
+  /things/{thingId}/activity-logs/{logId}:
+    get:
+      tags:
+        - Things
+      summary: Retrieve one thing log
+      description: |
+        Retrieves a specific activity log for a specific thing using their respective identifiers. Your user account must have `read` privilege for the target thing to execute this request.
+      operationId: GetThingLog
+      parameters:
+        - $ref: '#/components/parameters/thingPathId'
+        - $ref: '#/components/parameters/thingLogPathId'
+      responses:
+        '200':
+          description: OK - Activity log retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getThingLog200'
+        '401':
+          description: Unauthorized - User authentication failed or not provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden - User does not have the privileges to access this thing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found - Thing doesn't exist, activity log doesn't exist, or you don't have the privileges to access it.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+        '405':
+          description: Method Not Allowed - The specified HTTP verb is not supported by the endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/405'
+        '500':
+          description: Internal Server Error - There's an unexpected issue with the server handling the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+        '503':
+          description: Service Unavailable - The server temporarily cannot handle requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/503'
+      x-codeSamples:
+        - lang: cURL
+          label: cURL - macOS / Linux
+          source: |
+            curl --include --request GET 'https://us.service.company.com/api/v1/things/76/activity-logs/1' \
+            --header 'X-API-Key: api-key-here'
+        - lang: cURL
+          label: cURL - Windows
+          source: |
+            curl --include --request GET "https://us.service.company.com/api/v1/things/76/activity-logs/1" ^
+            --header "X-API-Key: api-key-here"
+  /relationships:
+    get:
+      tags:
+        - Relationships
+      summary: Retrieve all relationships
+      description: |
+        Retrieves a list of all relationships in your database to which you have `read` privilege along with their characteristics. This operation can also provide responses in `text/csv` format.
+      operationId: GetRelationships
+      parameters:
+        - $ref: '#/components/parameters/accept-text@csv'
+      responses:
+        '200':
+          description: OK - List of relationships retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getRelationships200json'
+            text/csv:
+              schema:
+                $ref: '#/components/schemas/getRelationships200csv'
+        '401':
+          description: Unauthorized - User authentication failed or not provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden - User does not have the privileges to retrieve relationships
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found - No relationships exist, or you don't have the privileges to access them
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+        '405':
+          description: Method Not Allowed - The specified HTTP verb is not supported by the endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/405'
+        '500':
+          description: Internal Server Error - There's an unexpected issue with the server handling the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+        '503':
+          description: Service Unavailable - The server temporarily cannot handle requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/503'
+      security:
+        - HTTP Basic: []
+      servers:
+        - url: https://{hostname}:{port}/api/v1
+          variables:
+            hostname:
+              description: The hostname or IP address of your Example Service host machine.
+              default: hostname
+            port:
+              description: The port number designated for the Example Service's web server.
+              default: '3780'
+      x-codeSamples:
+        - lang: cURL
+          label: cURL - macOS / Linux
+          source: |
+            curl --include --request GET 'https://{hostname}:{port}/api/v1/relationships' \
+            --header 'Accept: text/csv' \
+            --header 'Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ='
+        - lang: cURL
+          label: cURL - Windows
+          source: |
+            curl --include --request GET "https://{hostname}:{port}/api/v1/relationships" ^
+            --header "Accept: text/csv" ^
+            --header "Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ="
+    post:
+      tags:
+        - Relationships
+      summary: Search for relationships
+      description: |
+        Retrieves a list of all relationships in your database to which you have `read` privilege, along with their characteristics, that match the filter criteria you provide in the request body.
+      operationId: SearchForRelationships
+      requestBody:
+        description: |
+          Format your request body with one or more search criteria to return a filtered response of relationships.
+          The `filters` array must be present in the request body or the API will return a `400 Bad Request` response.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/relationships'
+      responses:
+        '200':
+          description: OK - Filtered list of relationships retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/postRelationships200'
+        '400':
+          description: Bad Request - The endpoint is invalid, or the request body is malformed or too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400'
+        '401':
+          description: Unauthorized - User authentication failed or not provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden - User does not have the privileges to create things
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '405':
+          description: Method Not Allowed - The specified HTTP verb is not supported by the endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/405'
+        '415':
+          description: Unsupported Media Type - The request body is not in the correct format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/415'
+        '500':
+          description: Internal Server Error - There's an unexpected issue with the server handling the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+        '503':
+          description: Service Unavailable - The server temporarily cannot handle requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/503'
+      security:
+        - HTTP Basic: []
+      servers:
+        - url: https://{hostname}:{port}/api/v1
+          variables:
+            hostname:
+              description: The hostname or IP address of your Example Service host machine.
+              default: hostname
+            port:
+              description: The port number designated for the Example Service's web server.
+              default: '3780'
+      x-codeSamples:
+        - lang: cURL
+          label: cURL - macOS / Linux
+          source: |
+            curl --include --request POST 'https://{hostname}:{port}/api/v1/relationships' \
+            --header 'Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=' \
+            --header 'Content-Type: application/json' \
+            --data-raw '{
+              "filters": [
+                {
+                  "field": "relId",
+                  "operator": "in-range",
+                  "lower": "1",
+                  "upper": "20"
+                },
+                {
+                  "field": "inUse",
+                  "operator": "is",
+                  "value": "true"
+                }
+              ],
+              "match": "all"
+            }'
+        - lang: cURL
+          label: cURL - macOS / Windows
+          source: |
+            curl --include --request POST "https://{hostname}:{port}/api/v1/relationships" ^
+            --header "Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=" ^
+            --header "Content-Type: application/json" ^
+            --data-raw "{
+              \"filters\": [
+                {
+                  \"field\": \"relId\",
+                  \"operator\": \"in-range\",
+                  \"lower\": \"1\",
+                  \"upper\": \"20\"
+                },
+                {
+                  \"field\": \"inUse\",
+                  \"operator\": \"is\",
+                  \"value\": \"true\"
+                }
+              ],
+              \"match\": \"all\"
+            }"
+  /accounts/{accountId}:
+    get:
+      tags:
+        - Accounts
+      summary: Retrieve an account
+      description: |
+        Retrieves a specific customer account using the provided identifier. Your user account must have `read` privilege for the target account to execute this request. Only users with the Administrator role have this privilege.
+      operationId: GetAnAccount
+      parameters:
+        - $ref: '#/components/parameters/accountPathId'
+      responses:
+        '200':
+          description: OK - Customer account retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getAccount200'
+        '401':
+          description: Unauthorized - User authentication failed or not provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/401'
+        '403':
+          description: Forbidden - User does not have the privileges to access this account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/403'
+        '404':
+          description: Not Found - Account doesn't exist, or you don't have the privileges to access it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/404'
+        '405':
+          description: Method Not Allowed - The specified HTTP verb is not supported by the endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/405'
+        '500':
+          description: Internal Server Error - There's an unexpected issue with the server handling the request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/500'
+        '503':
+          description: Service Unavailable - The server temporarily cannot handle requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/503'
+      x-codeSamples:
+        - lang: cURL
+          label: cURL - macOS / Linux
+          source: |
+            curl --include --request GET 'https://us.service.company.com/api/v1/accounts/12' \
+            --header 'X-API-Key: api-key-here'
+        - lang: cURL
+          label: cURL - Windows
+          source: |
+            curl --include --request GET "https://us.service.company.com/api/v1/accounts/12" ^
+            --header "X-API-Key: api-key-here"
+components:
+  securitySchemes:
+    API Key:
+      type: apiKey
+      description: |
+        Requests to this API require an API key passed through the `X-API-Key` header.
+
+        ## Access to protected resources
+
+        The privileges associated with your user account determine your level of access when interacting with the API. All operations in this documentation resource list the privileges you will need to execute a successful request.
+        
+        ## Security
+        
+        For security purposes, the `401`, `403`, and `404` response statuses and messages may be obscured to prevent information exposure. This table breaks down each of these scenarios:
+        
+        | Is the user authenticated? | Is the resource protected? | Is the user authorized? | Response code returned |
+        | --- | --- | --- | --- |
+        | No | Yes | No | `401` |
+        | No | Resource doesn't exist | No | `401` |
+        | Yes | No | Yes | `20x` |
+        | Yes | Yes | No | `404` |
+        | Yes | Yes | Yes | `20x` |
+        | Yes | Resource doesn't exist | Yes | `404` |
+      name: X-API-Key
+      in: header
+    HTTP Basic:
+      type: http
+      description: |
+        Requests to this API require HTTP Basic authentication. Your supplied credentials must match an Example Service user account and be passed as a Base64-encoded hash of `username:password` with the `Authorization: Basic` header.
+        
+        ## Access to protected resources
+        
+        The privileges associated with your user account determine your level of access when interacting with the API. All operations in this documentation resource list the privileges you will need to execute a successful request.
+        
+        ## Security
+        
+        For security purposes, the `401`, `403`, and `404` response statuses and messages may be obscured to prevent information exposure. This table breaks down each of these scenarios:
+        
+        | Is the user authenticated? | Is the resource protected? | Is the user authorized? | Response code returned |
+        | --- | --- | --- | --- |
+        | No | Yes | No | `401` | 
+        | No | Resource doesn't exist | No | `401` |
+        | Yes | No | Yes | `20x` |
+        | Yes | Yes | No | `404` |
+        | Yes | Yes | Yes | `20x` |
+        | Yes | Resource doesn't exist | Yes | `404` |
+      scheme: basic
+  parameters:
+    page:
+      name: page
+      in: query
+      description: |
+        The index of the page to retrieve. `0` is the first index, and thus, corresponds to the first page.
+      schema:
+        type: integer
+        default: 0
+    size:
+      name: size
+      in: query
+      description: The maximum number of records to include per page.
+      schema:
+        type: integer
+        default: 10
+    sort:
+      name: sort
+      in: query
+      description: |
+        Determines how the page should be sorted in ascending (`ASC`) or descending (`DESC`) order based on one or more field values in the response schema. The `sort` query parameter expects a string value composed of a response schema field name, a comma, and a sort direction. For example:
+        
+        * `name,ASC`
+        * `id,DESC`
+        
+        You can also specify multiple sort fields in a single direction by order of precedence in the same parameter. In this example, results are returned based on `type` in descending order first, then based on `id` if multiple records with the same `type` value are returned:
+        
+        * `type,id,DESC`
+        
+        If you need to sort on multiple fields in different directions, you can provide the `sort` parameter multiple times in your request URL. In this example, results are returned based on `type` in descending order first, then in ascending order based on `id` if multiple records with the same `type` value are returned:
+        
+        * `sort=type,ASC&sort=id,DESC`
+      schema:
+        type: string
+      allowReserved: true
+    thingPathId:
+      name: thingId
+      in: path
+      description: |
+        The unique identifier of the thing.
+      required: true
+      schema:
+        type: integer
+    thingLogPathId:
+      name: logId
+      in: path
+      description: The unique identifier of the activity log.
+      required: true
+      schema:
+        type: integer
+    accept-text@csv:
+      name: Accept
+      in: header
+      description: |
+        HTTP header to set the desired media type of the response.
+      schema:
+        type: string
+        enum:
+          - text/csv
+          - application/json
+        default: application/json
+    accountPathId:
+      name: accountId
+      in: path
+      description: The unqiue identifier of the customer account.
+      required: true
+      schema:
+        type: integer
+  schemas:
+    '400':
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: |
+            The code that corresponds to the specific condition that caused a `400 Bad Request` status. Possible error codes for this status and troubleshooting information for each are as follows:
+            
+            * `MALFORMED_BODY` - The payload included with your request is malformed in some way, usually due to the presence of invalid characters or because the syntax of the expected media type is invalid itself. To resolve this, verify that your payload is in the correct format. For `application/json` payloads, you can verify your syntax by using a tool like [JSONLint](https://jsonlint.com/).
+            * `MISSING_FIELDS` - The payload is missing required fields. Check the request body schema for field requirements and ensure your payload includes those fields in the correct format.
+            * `INVALID_RESOURCE_GROUP` - The endpoint you requested doesn't exist. This is usually due to a typing error in the endpoint URL, so verify that the endpoint your are requesting is spelled correctly.
+          enum:
+            - MALFORMED_BODY
+            - MISSING_FIELDS
+            - INVALID_RESOURCE_GROUP
+        message:
+          $ref: '#/components/schemas/message'
+        correlationId:
+          $ref: '#/components/schemas/correlationId'
+      example:
+        errorCode: MALFORMED_BODY
+        message: The request body contains invalid characters or syntax for the expected media type.
+        correlationId: 5ce55934-cd74-4ede-a259-339b26c82fb3
+    '401':
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: |
+            The code that corresponds to the specific condition that caused a `401 Unauthorized` status. Despite its name, `401 Unauthorized` denotes an **authentication** failure (**authorization** failures are handled by the `403 Forbidden` status). Possible error codes for this status and troubleshooting information for each are as follows:
+            
+            * `UNAUTHORIZED` - The API failed to authenticate your supplied credentials. Verify that your request includes the necessary `X-API-Key` header with your API key and that it is formatted correctly. If the issue persists, your API key may have been revoked.
+          enum:
+            - UNAUTHORIZED
+        message:
+          $ref: '#/components/schemas/message'
+        correlationId:
+          $ref: '#/components/schemas/correlationId'
+      example:
+        errorCode: UNAUTHORIZED
+        message: The API failed to authenticate the supplied credentials.
+        correlationId: 5ce55934-cd74-4ede-a259-339b26c82fb3
+    '403':
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: |
+            The code that corresponds to the specific condition that caused a `403 Forbidden` status. Possible error codes for this status and troubleshooting information for each are as follows:
+            
+            * `ACCESS_DENIED` - The provided API key does not have the necessary privileges to perform this operation. All API keys inherit the privileges of the generating user account, so your current privileges may be limited. Check with your Administrator to verify what privileges are associated with your user account. Here's a breakdown of the privileges you will need to interact with supported HTTP methods:
+              * `GET` - requires `read` privilege for the requested resource
+              * `POST`, `PUT`, and `PATCH` - requires `read/write` privileges for the requested resource
+              * `DELETE` - requires `delete` privilege for the requested resource
+          enum:
+            - ACCESS_DENIED
+        message:
+          $ref: '#/components/schemas/message'
+        correlationId:
+          $ref: '#/components/schemas/correlationId'
+      example:
+        errorCode: ACCESS_DENIED
+        message: The provided API key does not have the privileges to perform this operation.
+        correlationId: 5ce55934-cd74-4ede-a259-339b26c82fb3
+    '404':
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: |
+            The code that corresponds to the specific condition that caused a `404 Not Found` status. Possible error codes for this status and troubleshooting information for each are as follows:
+            
+            * `NOT_FOUND` - The requested endpoint does not exist, or you don't have the privilege to access it. This error is specific to running operations on collection resources. Verify that the endpoint you're requesting is formatted correctly and that you have the necessary `read` or `read/write` privileges for the operation.
+            * `RESOURCE_NOT_FOUND` - No resource matches the specified parameters, or you don't have the privilege to access it. This error is specific to running operations on instance resources. Verify that the path parameter of your request corresponds to an existing resource and that you have the necessary `read` or `read/write` privileges for the operation.
+          enum:
+            - NOT_FOUND
+            - RESOURCE_NOT_FOUND
+        message:
+          $ref: '#/components/schemas/message'
+        correlationId:
+          $ref: '#/components/schemas/correlationId'
+      example:
+        errorCode: RESOURCE_NOT_FOUND
+        message: No resource matches the specified parameters.
+        correlationId: 5ce55934-cd74-4ede-a259-339b26c82fb3
+    '405':
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: |
+            The code that corresponds to the specific condition that caused a `405 Method Not Allowed` status. Possible error codes for this status and troubleshooting information for each are as follows:
+            
+            * `METHOD_NOT_ALLOWED` - This endpoint does not support this HTTP method. Check the documentation to see all methods that the endpoint supports. You can also make another request against the endpoint with the `OPTIONS` method to see all supported HTTP methods in the response.
+          enum:
+            - METHOD_NOT_ALLOWED
+        message:
+          $ref: '#/components/schemas/message'
+        correlationId:
+          $ref: '#/components/schemas/correlationId'
+      example:
+        errorCode: METHOD_NOT_ALLOWED
+        message: This endpoint does not support this HTTP method.
+        correlationId: 5ce55934-cd74-4ede-a259-339b26c82fb3
+    '415':
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: |
+            The code that corresponds to the specific condition that caused a `415 Unsupported Media Type` status. Possible error codes for this status and troubleshooting information for each are as follows:
+            
+            * `UNSUPPORTED_MEDIA_TYPE` - The payload's media type is not supported. Check the documentation to see what request body media types are supported by the endpoint.
+          enum:
+            - UNSUPPORTED_MEDIA_TYPE
+        message:
+          $ref: '#/components/schemas/message'
+        correlationId:
+          $ref: '#/components/schemas/correlationId'
+      example:
+        errorCode: UNSUPPORTED_MEDIA_TYPE
+        message: The payload's media type is not supported.
+        correlationId: 5ce55934-cd74-4ede-a259-339b26c82fb3
+    '500':
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: |
+            The code that corresponds to the specific condition that caused a `500 Internal Server Error` status. Possible error codes for this status and troubleshooting information for each are as follows:
+            
+            * `INTERNAL_SERVER_ERROR` - The server encountered an unexpected error. If your requests continue to respond with this error, contact the Support team.
+          enum:
+            - INTERNAL_SERVER_ERROR
+        message:
+          $ref: '#/components/schemas/message'
+        correlationId:
+          $ref: '#/components/schemas/correlationId'
+      example:
+        errorCode: INTERNAL_SERVER_ERROR
+        message: The server encountered an unexpected error.
+        correlationId: 5ce55934-cd74-4ede-a259-339b26c82fb3
+    '503':
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: |
+            The code that corresponds to the specific condition that caused a `503 Service Unavailable` status. Possible error codes for this status and troubleshooting information for each are as follows:
+            
+            * `SERVICE_UNAVAILABLE` - The API service is temporarily unavailable. This is usually due to high request volume or maintenance periods. Since this error indicates a temporary outage, the server should resume handling requests in time. However, if your requests continue to respond with this error, contact the Support team.
+          enum:
+            - SERVICE_UNAVAILABLE
+        message:
+          $ref: '#/components/schemas/message'
+        correlationId:
+          $ref: '#/components/schemas/correlationId'
+      example:
+        errorCode: SERVICE_UNAVAILABLE
+        message: The API service is temporarily unavailable.
+        correlationId: 5ce55934-cd74-4ede-a259-339b26c82fb3
+    getThings200:
+      type: object
+      properties:
+        pageInfo:
+          type: object
+          description: Contains pagination data for the response.
+          properties:
+            page:
+              type: integer
+              description: The page number of the response.
+              default: 0
+            size:
+              type: integer
+              description: The maximum number of records that each page supports.
+              default: 10
+            totalPages:
+              type: integer
+              description: The total number of pages that encompass all records returned by the request.
+              minimum: 1
+            totalRecords:
+              type: integer
+              description: The total number of records returned by the request across all pages.
+              minimum: 1
+        allThings:
+          type: array
+          description: Contains a list of things as determined by your specified pagination query parameters.
+          items:
+            type: object
+            properties:
+              thingId:
+                type: integer
+                description: The unique identifier of the thing.
+              name:
+                type: string
+                description: The user-assigned name of the thing.
+              ownedBy:
+                type: array
+                description: The accounts the thing is associated with, and by what relationship.
+                items:
+                  type: object
+                  properties:
+                    accountName:
+                      type: string
+                      description: The name of the account that owns the thing.
+                    relationship:
+                      type: string
+                      description: The name of the relationship the thing has with the owner account.
+      example:
+        pageInfo:
+          page: 3
+          size: 25
+          totalPages: 6
+          totalRecords: 141
+        allThings:
+          - thingId: 75
+            name: Thing 1
+            ownedBy:
+              - accountName: Customer 1
+                relationship: Active subscriber
+              - accountName: Customer 2
+                relationship: Trial
+          - thingId: 76
+            name: Thing 2
+            ownedBy:
+              - accountName: Customer 7
+                relationship: Former subscriber
+              - accountName: Customer 23
+                relationship: Purchase in progress
+    message:
+      type: string
+      description: A human-readable explanation of the error code associated with the response status. Refer to the `errorCode` schema for explanation and troubleshooting steps for each error case.
+    correlationId:
+      type: string
+      format: uuid
+      description: The universally unique identifier for your request. The Support team can use this identifier to look up your request for troubleshooting purposes.
+    things:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name to assign to the thing.
+        ownedBy:
+          type: array
+          description: The accounts the thing should be associated with, and by what relationship.
+          items:
+            type: object
+            properties:
+              accountName:
+                type: string
+                description: The name of the account that should own the thing.
+              relationship:
+                type: string
+                description: The name of the relationship that should own the thing.
+    postThing201:
+      type: object
+      properties:
+        thingId:
+          type: integer
+          description: The unique identifier that was assigned to the thing.
+      example:
+        thingId: 74
+    getThing200:
+      type: object
+      properties:
+        thingId:
+          type: integer
+          description: The unique identifier of the thing.
+        name:
+          type: string
+          description: The user-assigned name of the thing.
+        ownedBy:
+          type: array
+          description: The accounts the thing is associated with, and by what relationship.
+          items:
+            type: object
+            properties:
+              accountName:
+                type: string
+                description: The name of the account that owns the thing.
+              relationship:
+                type: string
+                description: The name of the relationship the thing has with the owner account.
+      example:
+        thingId: 41
+        name: Thing 8
+        ownedBy:
+          - accountName: Customer 41
+            relationship: Active subscriber
+    patchThing:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name to assign to the thing.
+        ownedBy:
+          type: array
+          description: The additional accounts the thing should be associated with, and by what relationship.
+          items:
+            type: object
+            properties:
+              accountName:
+                type: string
+                description: The name of the account that should own the thing.
+              relationship:
+                type: string
+                description: The name of the relationship that should own the thing.
+    patchThing200:
+      type: object
+      properties:
+        thingId:
+          type: string
+          description: The user-assigned name of the thing.
+        ownedBy:
+          type: array
+          description: The accounts the thing is associated with, and by what relationship. This includes newly-added and existing ownership data.
+          items:
+            type: object
+            properties:
+              accountName:
+                type: string
+                description: The name of the account that owns the thing.
+              relationship:
+                type: string
+                description: The name of the relationship the thing has with the owner account.
+      example:
+        thingId: 74
+        name: Existing thing
+        ownedBy:
+          - accountName: Existing customer
+            relationship: Existing relationship
+          - accountName: New customer
+            relationship: New relationship
+    getThingLogs200:
+      type: object
+      properties:
+        thingId:
+          type: integer
+          description: The unique identifier of the thing.
+        activityLogs:
+          type: array
+          description: The activity logs that have been recorded and stored for the thing.
+          items:
+            type: object
+            properties:
+              logName:
+                type: string
+                description: The name of the activity log.
+              logId:
+                type: integer
+                description: The unique identifier of the activity log.
+              dateRecorded:
+                type: string
+                format: date-time
+                description: The date the activity log was recorded in the history of the thing in [ISO-8601 format](https://en.wikipedia.org/wiki/ISO_8601).
+              logData:
+                type: string
+                description: The output data of the activity log.
+      example:
+        thingId: 76
+        activityLogs:
+          - logName: New relationship
+            logId: 1
+            dateRecorded: '2022-07-13T18:30:01Z'
+            logData: Thing 4 has been associated as a subscription object to the Customer 41 account.
+          - logName: Modified
+            logId: 2
+            dateRecorded: '2022-07-13T18:33:15Z'
+            logData: Thing 4 was modified by user Ed Sheehy.
+    getThingLog200:
+      type: object
+      properties:
+        thingId:
+          type: integer
+          description: The unique identifier of the thing.
+        activityLog:
+          type: object
+          description: The activity log that has been recorded and stored for the thing.
+          properties:
+            logName:
+              type: string
+              description: The name of the activity log.
+            logId:
+              type: integer
+              description: The unique identifier of the activity log.
+            dateRecorded:
+              type: string
+              format: date-time
+              description: The date the activity log was recorded in the history of the thing in [ISO-8601 format](https://en.wikipedia.org/wiki/ISO_8601).
+            logData:
+              type: string
+              description: The output data of the activity log.
+      example:
+        thingId: 76
+        activityLog:
+          logName: New relationship
+          logId: 1
+          dateRecorded: '2022-07-13T18:30:01Z'
+          logData: Thing 4 has been associated as a subscription object to the Customer 41 account.
+    getRelationships200json:
+      type: object
+      properties:
+        relationships:
+          type: array
+          description: An array of all relationships and their details.
+          items:
+            type: object
+            properties:
+              relId:
+                type: integer
+                description: The unique identifier of the relationship.
+              relName:
+                type: string
+                description: The user-assigned name of the relationship.
+              inUse:
+                type: boolean
+                description: Indicates whether the relationship is currently being used to link accounts with things.
+      example:
+        relationships:
+          - relId: 1
+            name: Active subscriber
+            inUse: true
+          - relId: 2
+            name: Trial
+            inUse: true
+          - relId: 3
+            name: Purchase in progress
+            inUse: false
+    getRelationships200csv:
+      title: A CSV response listing all relationships and their details. The first row represents column headers for relationship characteristics.
+      type: string
+      description: |
+        | relId | name | inUse |
+        | --- | --- | --- |
+        | The unique identifier of the relationship (an integer). | The user-assigned name of the relationship (a string). | Indicates whether the relationship is currently being used to link accounts with things (a boolean). |
+      example: "relId,name,inUse\n1,Active subscriber,true\n2,Trial,true\n3,Purchase in progress,false"
+    relationships:
+      required:
+        - filters
+      type: object
+      properties:
+        filters:
+          type: array
+          description: The individual filters that make up your search criteria.
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: The filter field for the search criterion.
+              operator:
+                type: string
+                description: The operator on how to match the search criterion.
+              lower:
+                type: string
+                description: The lower value for a search criterion when the `operator` is `in-range` (inclusive), `not-in-range` (exclusive), or `is-between` (exclusive).
+              upper:
+                type: string
+                description: The upper value for a search criterion when the `operator` is `in-range` (inclusive), `not-in-range` (exclusive), or `is-between` (exclusive).
+              value:
+                type: string
+                description: The single value to match using the operator.
+              values:
+                type: array
+                description: An array of values to match using the operator.
+                items:
+                  type: string
+        match:
+          type: string
+          description: |
+            Determines the scope of how relationships should be matched to the search criteria:
+            
+            * `all` - Requires that all filters match for the relationship to be included.
+            * `any` - Requires that at least one filter matches for the relationship to be included.
+          enum:
+            - all
+            - any
+          default: all
+    postRelationships200:
+      type: object
+      properties:
+        relationships:
+          type: array
+          description: An array of all relationships and their details.
+          items:
+            type: object
+            properties:
+              relId:
+                type: integer
+                description: The unique identifier of the relationship.
+              relName:
+                type: string
+                description: The user-assigned name of the relationship.
+              inUse:
+                type: boolean
+                description: Indicates whether the relationship is currently being used to link accounts with things.
+      example:
+        relationships:
+          - relId: 1
+            name: Active subscriber
+            inUse: true
+          - relId: 2
+            name: Trial
+            inUse: true
+          - relId: 15
+            name: Early Access feature
+            inUse: true
+          - relId: 20
+            name: Research participant
+            inUse: true
+    getAccount200:
+      type: object
+      properties:
+        accountId:
+          type: integer
+          description: The unique identifier of the customer account.
+        name:
+          type: string
+          description: The administrator-assigned name of the customer account.
+        timeStamps:
+          type: object
+          description: Relevant dates in the history of the account in [ISO-8601 format](https://en.wikipedia.org/wiki/ISO_8601).
+          properties:
+            accountCreated:
+              type: string
+              format: date-time
+              description: The date the account was initially created.
+            activeSince:
+              type: string
+              format: date-time
+              description: The date the account was last activated. If the account was never suspended, this activation date will match the `accountCreated` date.
+            suspendedSince:
+              type: string
+              format: date-time
+              description: The date the account was last suspended. This property will be null if the account is active at the time of the request.
+      example:
+        accountId: 12
+        name: Customer 12
+        timeStamps:
+          accountCreated: '2022-06-13T21:26:33.931Z'
+          activeSince: '2022-06-13T21:26:33.931Z'
+          suspendedSince: ''
+x-tagGroups:
+  - name: Ownership
+    tags:
+      - Things
+      - Relationships
+  - name: Customer Information
+    tags:
+      - Accounts
