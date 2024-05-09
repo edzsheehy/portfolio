@@ -6,7 +6,7 @@
 >
 > Sysmon plays an important role in InsightIDR and MDR providing the best value to customers, so the Insight Agent takes exclusive control of the Sysmon configuration on the device to ensure event collection is reliably stable. However, this exclusive control arrangement has some drawbacks:
 > 
-> * While Sysmon provides better event logging data, it's also error-prone and can cause Windows to crash - an issue that's out of Rapid7's control and is related to Sysmon's kernal-level operation.
+> * While Sysmon provides better event logging data, it's also error-prone and can cause Windows to crash - an issue that's out of Rapid7's control and is related to Sysmon's kernel-level operation.
 > * An IT team might want to use a custom Sysmon configuration for their own purposes.
 >
 > I wrote the following article to explain how the Sysmon service works alongside Rapid7 products, what customers should expect if the Sysmon service encounters errors, and what accommodations Rapid7 makes for both Sysmon's crash problem and a customer's desire to use their own configuration.
